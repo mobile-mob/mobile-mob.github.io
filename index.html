@@ -1,510 +1,294 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta name="description" content="">
-	<meta name="author" content="">
+    <meta charset="utf-8"/>
+    <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script>
+    var highscore = 0;
+    var gameColor = "#FF0080";
+    var bullets = []; // the lists of all bullets
+    var enemies =[];
+    var load_gameColor;
+    var score = 0;
+    var hitpoint = 100;
+    $(document).ready( function (){
+    $("#save").click( function () {
+      var msg = {
+        "message_type": "SAVE_GAME",
+        "game_data": {
+          "gameColor": gameColor,
+          "bullets" : bullets,
+          "enemies" : enemies,
+          "score" : score,
+          "hitpoint": hitpoint,
+        }
+      };
+      window.parent.postMessage(msg, "*");
+    });  
+    $("#load").click( function () {
+      var msg = {
+        "message_type": "LOAD_GAME_REQUEST",
+      };
+      window.parent.postMessage(msg, "*");
+    });
 
-	<title>Mobile Mob | Aalto Hackers</title>
+    $("#score").click( function () {
+      var msg = {
+        "message_type": "POST_SCORE",
+        "score": score
+      };
+      window.parent.postMessage(msg, "*");
+    });
 
-	<!-- CSS -->
-	<link href="assets/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
-	<link href="assets/css/font-awesome.min.css" rel="stylesheet" media="screen">
-	<link href="assets/css/simple-line-icons.css" rel="stylesheet" media="screen">
-	<link href="assets/css/animate.css" rel="stylesheet">
+    $("#new").click( function () {
+        document.location.reload();
+    });
+    window.addEventListener("message", function(evt) {
+      if(evt.data.message_type === "LOAD_GAME") {
+        load_gameColor = evt.data.game_data.gameColor;
+        bullets  = evt.data.game_data.bullets;
+        enemies  = evt.data.game_data.enemies;
+        score  = evt.data.game_data.score;
+        hitpoint  = evt.data.game_data.hitpoint;
+        load_game();
+      } else if (evt.data.messageType === "MESSAGE") {
+        alert(evt.data.message);
+      }
+    });
 
-	<!-- Custom styles CSS -->
-	<link href="assets/css/style.css" rel="stylesheet" media="screen">
-
-    <script src="assets/js/modernizr.custom.js"></script>
-
+    function load_game(){
+        $('input[name="colorButton"]').val([load_gameColor]);
+    }
+    });
+    </script>
 </head>
 <body>
-
-	<!-- Preloader -->
-
-	<div id="preloader">
-		<div id="status"></div>
-	</div>
-
-	<!-- Home start -->
-
-	<section id="home" class="pfblock-image screen-height">
-        <div class="home-overlay"></div>
-		<div class="intro">
-			<div class="start">Hello, We are Mobile Mob</div>
-			<h1>Mobile Native Developers</h1>
-			<div class="start">creating modern and intuitive Mobile Apps since last week</div>
-		</div>
-
-        <a href="#services">
-		<div class="scroll-down">
-            <span>
-                <i class="fa fa-angle-down fa-2x"></i>
-            </span>
-		</div>
-        </a>
-
-	</section>
-
-	<!-- Home end -->
-
-	<!-- Navigation start -->
-
-	<header class="header">
-
-		<nav class="navbar navbar-custom" role="navigation">
-
-			<div class="container">
-
-				<div class="navbar-header">
-					<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#custom-collapse">
-						<span class="sr-only">Toggle navigation</span>
-						<span class="icon-bar"></span>
-						<span class="icon-bar"></span>
-						<span class="icon-bar"></span>
-					</button>
-					<a class="navbar-brand" href="index.html">Mobile Mob</a>
-				</div>
-
-				<div class="collapse navbar-collapse" id="custom-collapse">
-					<ul class="nav navbar-nav navbar-right">
-						<li><a href="#home">Home</a></li>
-						<li><a href="#services">Team</a></li>
-                        <li><a href="#skills">Skills</a></li>
-                        <li><a href="#portfolio">Demos</a></li>
-					</ul>
-				</div>
-
-			</div><!-- .container -->
-
-		</nav>
-
-	</header>
-
-	<!-- Navigation end -->
-
-    <!-- Services start -->
-
-	<section id="services" class="pfblock pfblock-gray">
-		<div class="container">
-			<div class="row">
-
-				<div class="col-sm-6 col-sm-offset-3">
-
-					<div class="pfblock-header wow fadeInUp">
-						<h2 class="pfblock-title">We are Mobile Mob</h2>
-						<div class="pfblock-line"></div>
-						<div class="pfblock-subtitle">
-							We are a team of enthusiastic Android and iOS developers. We already had our kickoff at the Futurice mobile workshop in mid September. We just couldn't sit and wait till you tell us what to do. :) Anyway, it's nice to meet you!
-						</div>
-					</div>
-
-				</div>
-
-			</div>
-
-			<div class="row">
-
-				<div class="col-sm-3">
-
-					<div class="iconbox wow slideInLeft">
-						<div class="iconbox-icon">
-							<img src="assets/images/seyoung.jpg" alt="seyoung"/>
-						</div>
-						<div class="iconbox-text">
-							<h3 class="iconbox-title">Seyoung</h3>
-							<div id="align-left" class="iconbox-desc">
-
-								<ul>
-									<li>3rd year CS student</li>
-									<li>Sound analysis / Full stack(4M work experience)</li>
-									<li>iOS, Django, Scala, C, Git</li>
-									<li>Moto - "Shiny eyes"</li>
-								</ul>
-							</div>
-						</div>
-					</div>
-
-				</div>
-
-				<div class="col-sm-3">
-
-					<div class="iconbox wow slideInLeft">
-						<div id="elias" class="iconbox-icon">
-							<img src="assets/images/elias.jpg" alt="Elias"/>
-						</div>
-						<div class="iconbox-text">
-							<h3 class="iconbox-title">Elias</h3>
-							<div id="align-left" class="iconbox-desc">
-								<ul>
-									<li>2nd year CS student</li>
-									<li>Front-end developer(3M work experience)</li>
-									<li>Scala, SQLite, Database</li>
-									<li>Android, iOS, UX/UI</li>
-								</ul>
-							</div>
-						</div>
-					</div>
-
-				</div>
-
-				<div class="col-sm-3">
-
-					<div class="iconbox wow slideInRight">
-						<div class="iconbox-icon">
-							<img src="assets/images/hai.jpg" alt="hai"/>
-						</div>
-						<div class="iconbox-text">
-							<h3 class="iconbox-title">Hai</h3>
-							<div id="align-left" class="iconbox-desc">
-								<ul>
-									<li>2nd year CS student</li>
-									<li>Junior Consultant, Lempinen Consulting Oy</li>
-								<li>Specialized in backend</li>
-								<li>Scala, Java, JavaScript, MySQL, HTML & CSS</li>
-
-								</ul>
-
-							</div>
-						</div>
-					</div>
-
-				</div>
-
-				<div class="col-sm-3">
-
-					<div class="iconbox wow slideInRight">
-						<div class="iconbox-icon">
-							<img src="assets/images/brod.jpg" alt="brod"/>
-						</div>
-						<div class="iconbox-text">
-							<h3 class="iconbox-title">Broderick</h3>
-							<div id="align-left" class="iconbox-desc">
-								<ul>
-									<li>Quality award finalist in the Software Project course last year</li>
-									<li>Reverse engineer at F-Secure for the past 8 years</li>
-<li>Python, C, Lua, REST, HTTP, Git, Android, Java</li>
-								</ul>
-							</div>
-						</div>
-					</div>
-
-				</div>
-
-			</div><!-- .row -->
-
-			<!-- 2nd row -->
-			<div class="row">
-
-				<div class="col-sm-3">
-
-					<div class="iconbox wow slideInLeft">
-						<div class="iconbox-icon">
-							<img src="assets/images/alison.jpg" alt="alison"/>
-						</div>
-						<div class="iconbox-text">
-							<h3 class="iconbox-title">Alison</h3>
-							<div id="align-left" class="iconbox-desc">
-								<ul>
-									<li>2nd year CS student</li>
-									<li>Scala, SQL, XML, Android</li>
-									<li>Database</li>
-								</ul>
-							</div>
-						</div>
-					</div>
-
-				</div>
-
-				<div class="col-sm-3">
-
-					<div class="iconbox wow slideInLeft">
-						<div class="iconbox-icon">
-							<img src="assets/images/terho.jpg" alt="terho"/>
-						</div>
-						<div class="iconbox-text">
-							<h3 class="iconbox-title">Terho</h3>
-							<div id="align-left" class="iconbox-desc">
-								<ul>
-									<li>2nd year CS student</li>
-									<li>Scala, Java, databases</li>
-									<li>Android</li>
-									<li>Hobbyist video editor</li>
-								</ul>
-							</div>
-						</div>
-					</div>
-
-				</div>
-
-				<div class="col-sm-3">
-
-					<div class="iconbox wow slideInRight">
-						<div class="iconbox-icon">
-							<img src="assets/images/rasmus.jpg" alt="rasmus"/>
-						</div>
-						<div class="iconbox-text">
-							<h3 class="iconbox-title">Rasmus</h3>
-							<div id="align-left" class="iconbox-desc">
-								<ul>
-									<li>2nd year CS student</li>
-									<li>IT engineer(4Y work experience)</li>
-									<li>Scala, Java, Android</li>
-									<li>Gadget lover & Photographer</li>
-								</ul>
-
-							</div>
-						</div>
-					</div>
-
-				</div>
-
-				<div class="col-sm-3">
-
-					<div class="iconbox wow slideInRight">
-						<div class="iconbox-icon">
-							<img src="assets/images/pejam.jpg" alt="pejam"/>
-						</div>
-						<div class="iconbox-text">
-							<h3 class="iconbox-title">Pejam</h3>
-							<div id="align-left" class="iconbox-desc">
-								<ul>
-									<li>2nd year CS student</li>
-									<li>Scala, Python, Java, HTML, CSS, Javascript, SQL, XML</li>
-									<li>Computer management systems and servers</li>
-								</ul>
-							</div>
-						</div>
-					</div>
-
-				</div>
-
-			</div><!-- .row -->
-		</div><!-- .container -->
-	</section>
-
-	<!-- Services end -->
-
-	<!-- Skills start -->
-
-    <section class="pfblock pfblock-gray" id="skills">
-
-			<div class="container">
-
-				<div class="row skills">
-
-					<div class="row">
-
-                        <div class="col-sm-6 col-sm-offset-3">
-
-                            <div class="pfblock-header wow fadeInUp">
-                                <h2 class="pfblock-title">Relevant skills</h2>
-                                <div class="pfblock-line"></div>
-                                <div class="pfblock-subtitle">
-                                    capable force / total force
-                                </div>
-                            </div>
-
-                        </div>
-
-                    </div><!-- .row -->
-
-					<div class="col-sm-6 col-md-3 text-center">
-						<span data-percent="100" class="chart easyPieChart" style="width: 140px; height: 140px; line-height: 140px;">
-                            <span class="percent">8/8</span>
-
-                        </span>
-						<h3 class="text-center">Scala/Java</h3>
-					</div>
-					<div class="col-sm-6 col-md-3 text-center">
-						<span data-percent="25" class="chart easyPieChart" style="width: 140px; height: 140px; line-height: 140px;">
-                            <span class="percent">2/8</span>
-                        </span>
-						<h3 class="text-center">iOS</h3>
-					</div>
-					<div class="col-sm-6 col-md-3 text-center">
-						<span data-percent="88" class="chart easyPieChart" style="width: 140px; height: 140px; line-height: 140px;">
-                            <span class="percent">7/8</span>
-                        </span>
-						<h3 class="text-center">Android</h3>
-					</div>
-					<div class="col-sm-6 col-md-3 text-center">
-						<span data-percent="75" class="chart easyPieChart" style="width: 140px; height: 140px; line-height: 140px;">
-                            <span class="percent">6/8</span>
-                        </span>
-						<h3 class="text-center">Front-end</h3>
-					</div>
-
-				</div><!--End row -->
-
-			</div>
-
-    </section>
-
-	<!-- Portfolio start -->
-
-	<section id="portfolio" class="pfblock">
-		<div class="container">
-			<div class="row">
-
-				<div class="col-sm-6 col-sm-offset-3">
-
-					<div class="pfblock-header wow fadeInUp">
-						<h2 class="pfblock-title">Demos</h2>
-						<div class="pfblock-line"></div>
-						<div class="pfblock-subtitle">
-							We have done these projects during last two weeks <br>since the birth of Mobile Mob.
-						</div>
-					</div>
-
-				</div>
-
-			</div><!-- .row -->
-
-
-            <div class="row">
-
-                <div class="col-xs-12 col-sm-4 col-md-4">
-
-                    <div class="grid wow zoomIn">
-
-                            <img src="assets/images/cv_app.png" alt="mobile mob cv app"/>
-                        <h2><br>Mobile Mob CV app</h2><p>
-                        	Mobile Mob's Mobile native CV App <br>
-							Get it at <a href="https://play.google.com/store/apps/details?id=mobilemob.mobilemobcv">Google Play</a>
-                        </p>
-                    </div>
-
-                </div>
-
-                <div class="col-xs-12 col-sm-4 col-md-4">
-
-                    <div class="grid wow zoomIn">
-                        <img src="assets/images/rss_feed_app.png" alt="RSS feed reader"/>
-					<h2><br>RSS feed reader</h2><p>
-						BBC news RSS feed reader <br>View the source code at <a href="https://github.com/eliasmikkola/rss-mobile-news">Github</a>
-					</p>
-                    </div>
-
-                </div>
-
-                <div class="col-xs-12 col-sm-4 col-md-4">
-
-                    <div class="grid wow zoomIn">
-                        <img src="assets/images/weather_app.png" alt="Weather app"/>
-					<h2><br>Weather app</h2><p>
-						Simple weather app
-					</p>
-                    </div>
-
-                </div>
-			</div>
-
-			<!-- Demo Second row -->
-			<div class="row">
-
-                <div class="col-xs-12 col-sm-4 col-md-4">
-                    <div class="grid wow zoomIn">
-                            <img src="assets/images/iOS_rss_reader_app.png" alt="iOS_rss_reader_app"/>
-                        <h2><br>rss feed reader</h2><p>
-                        	 BBC news RSS feed reader<br>
-							View the source code at <a href="https://github.com/YoungxHelsinki/tux_free_codes/tree/master/iOS/Reader">Github</a>
-                        </p>
-                    </div>
-                </div>
-
-				<div class="col-xs-12 col-sm-4 col-md-4">
-                    <div class="grid wow zoomIn">
-                        <img src="assets/images/food_tracker_app.png" alt="food_tracker_app"/>
-					<h2><br>FoodTracker</h2><p>
-						User input, labeling, local image library access.<br>
-						View the source code at <a href="https://github.com/YoungxHelsinki/tux_free_codes/tree/master/iOS/Food%20Tracker">Github</a></p>
-                    </div>
-				</div>
-
-
-            </div>
-
-		</div><!-- .contaier -->
-
-	</section>
-
-	<!-- Portfolio end -->
-
-    <!-- Skills end -->
-
-	<!-- CallToAction start -->
-
-	<section class="calltoaction">
-		<div class="container">
-
-			<div class="row">
-
-				<div class="col-md-12 col-lg-12">
-					<h2 class="wow slideInRight" data-wow-delay=".1s">ARE YOU READY TO START?</h2>
-					<div class="calltoaction-decription wow slideInRight" data-wow-delay=".2s">
-						Broderick Aquilino (Scrum master)<br>
-						<a href="mailto:broderick.aquilino@aalto.fi">broderick.aquilino@aalto.fi</a><br>
-						+358 40 080 2771
-					</div>
-				</div>
-
-
-
-			</div>
-		</div>
-	</section>
-
-	<!-- CallToAction end -->
-
-
-
-
-	<!-- Footer start -->
-
-	<footer id="footer">
-		<div class="container">
-			<div class="row">
-
-				<div class="col-sm-12">
-					<p class="heart">
-                        Made with <span class="fa fa-heart fa-2x animated pulse"></span> in Otaniemi
-                    </p>
-                    <p class="copyright">
-                        © 2015 Mobile Mob | Images: <a href="https://unsplash.com/">Unsplash</a> & <a href="http://zoomwalls.com/">Zoomwalls</a>
-					</p>
-
-				</div>
-
-			</div><!-- .row -->
-		</div><!-- .container -->
-	</footer>
-
-	<!-- Footer end -->
-
-	<!-- Scroll to top -->
-
-	<div class="scroll-up">
-		<a href="#home"><i class="fa fa-angle-up"></i></a>
-	</div>
-
-    <!-- Scroll to top end-->
-
-	<!-- Javascript files -->
-
-	<script src="assets/js/jquery-1.11.1.min.js"></script>
-	<script src="assets/bootstrap/js/bootstrap.min.js"></script>
-	<script src="assets/js/jquery.parallax-1.1.3.js"></script>
-	<script src="assets/js/imagesloaded.pkgd.js"></script>
-	<script src="assets/js/jquery.sticky.js"></script>
-	<script src="assets/js/smoothscroll.js"></script>
-	<script src="assets/js/wow.min.js"></script>
-    <script src="assets/js/jquery.easypiechart.js"></script>
-    <script src="assets/js/waypoints.min.js"></script>
-    <script src="assets/js/jquery.cbpQTRotator.js"></script>
-	<script src="assets/js/custom.js"></script>
-
+<h1>This is the game</h1>
+<div id="game_to_server">
+<button id="save">Save Game</button>
+<button id="load">Load Game</button>
+<button id="score">Post score</button>
+<button id="new">New Game</button>
+</div><br>
+<div>
+    <input type="radio" name="colorButton" value="#FF0080" checked>Pink</option>
+    <input type="radio" name="colorButton" value="#0000FF">Blue</option>
+    <input type="radio" name="colorButton" value="#FFFF00">Yellow</option>
+</div>
+<canvas id="cv" width="800" height="600"></canvas>
+<script>
+    var canvas = document.getElementById("cv");
+    var ctx = canvas.getContext("2d");
+    var cx = canvas.width/2; // the center of x-axis
+    var cy = canvas.height/2; // the center of y-axis
+    var gunAngle = 0; // the gun's rotational angle
+    var gunWidth = 20;
+    var gunLength = 40;
+    var centerRadius = 20; // the circular center of the gun
+
+    var bulletRadius = 10;
+    var isMouseDown = false;
+    var bulletSpeed = 1;
+
+    var enemiesNum = 10;
+    var enemyRadius = 20;
+    var enemySpeed = 0.5;
+    var damage = -20;
+
+    document.addEventListener("mousemove", mouseMoveHandler, false);
+    document.addEventListener("mousedown", mouseDownHandler, false);
+    document.addEventListener("mouseup", mouseUpHandler, false);
+
+    // disable double-clicking selection
+    document.addEventListener('mousedown', function(e){ e.preventDefault(); }, false);
+
+    function mouseMoveHandler(e){
+        mouseX=parseInt(e.clientX- 0);
+        mouseY=parseInt(e.clientY- 0);
+        var dx=mouseX-cx;
+        var dy=mouseY-cy;
+        gunAngle=Math.atan2(dy,dx);
+    }
+
+    function mouseDownHandler(e){
+        if (!isMouseDown){
+            createBullet();
+            isMouseDown = true;
+        }
+    }
+
+    function mouseUpHandler(e){
+        isMouseDown = false;
+    }
+
+    function drawGun(){
+        ctx.save();
+        ctx.translate(cx, cy);
+
+        // draw the circular center of the gun
+        ctx.beginPath();
+        ctx.arc(0,0,centerRadius, 0, Math.PI*2, false);
+        ctx.fillStyle = gameColor;
+        ctx.fill();
+        ctx.closePath();
+
+        // draw the gun
+        ctx.rotate(gunAngle);
+        ctx.beginPath();
+        ctx.rect(0 ,-gunWidth/2, gunLength, gunWidth);
+        ctx.fillStyle = gameColor;
+        ctx.fill();
+        ctx.closePath();
+        ctx.restore();
+    }
+
+    function drawBullets(){
+        for (var b=0; b<bullets.length; b++){
+            ctx.beginPath();
+            ctx.arc(bullets[b].x, bullets[b].y, bulletRadius, 0, Math.PI*2, false);
+            ctx.fillStyle = gameColor;
+            ctx.fill();
+            ctx.closePath();
+        }
+    }
+
+    function updateBullets(){
+        var b = bullets.length;
+        while (b--){
+            // update the next position of the bullets
+            if (bullets[b].x + bullets[b].dx < -bulletRadius ||
+                bullets[b].x + bullets[b].dx > canvas.width+bulletRadius ||
+                bullets[b].y + bullets[b].dy < -bulletRadius ||
+                bullets[b].y + bullets[b].dy > canvas.height+bulletRadius){
+                bullets.splice(b,1);
+            } else{
+                bullets[b].x += bullets[b].dx;
+                bullets[b].y += bullets[b].dy;
+            }
+        }
+    }
+
+    function createBullet(){
+        var newBullet = {x:cx, y: cy,
+                        dx:Math.cos(gunAngle) * bulletSpeed,
+                        dy:Math.sin(gunAngle) * bulletSpeed};
+        bullets.push(newBullet);
+    }
+
+    function drawEnemies(){
+        for (var e=0; e<enemies.length; e++){
+            ctx.beginPath();
+            ctx.arc(enemies[e].x, enemies[e].y, enemyRadius, 0, Math.PI*2, false);
+            ctx.fillStyle = gameColor;
+            ctx.fill();
+            ctx.closePath();
+        }
+    }
+
+    function updateEnemies(){
+        var e=enemies.length;
+        while(e--){
+            if (enemies[e].hit)
+                enemies.splice(e,1);
+            else{
+                enemies[e].x += enemies[e].dx;
+                enemies[e].y += enemies[e].dy;
+            }
+        }
+    }
+
+    function createEnemy(){
+        var isFromSides = false;
+        var enemyX = 0;
+        var enemyY = 0;
+        if (Math.random() < 0.5) isFromSides = true;
+        if (isFromSides){
+            enemyY = Math.random()*canvas.height;
+            if (Math.random() < 0.5) enemyX = canvas.width;
+        } else {
+            enemyX = Math.random()*canvas.width;
+            if (Math.random() < 0.5) enemyY = canvas.height;
+        }
+
+        var dx = cx-enemyX;
+        var dy = cy-enemyY;
+        var dh = Math.sqrt(dx*dx + dy*dy);
+        var enemyDx = dx/dh*enemySpeed;
+        var enemyDy = dy/dh*enemySpeed;
+
+        var newEnemy = {x: enemyX, y:enemyY, dx: enemyDx, dy: enemyDy, hit :false};
+        enemies.push(newEnemy);
+    }
+
+    function pawnEnemies(){
+        for (var e=0; e<enemiesNum; e++){
+            createEnemy();
+        }
+    }
+
+    function enemyHitDetection(){
+        for(var e=0; e<enemies.length; e++){
+            var enemy = enemies[e];
+            for(var b=0; b<bullets.length; b++){
+                var bullet = bullets[b];
+                if (bullet.x > enemy.x-enemyRadius &&
+                    bullet.x < enemy.x+enemyRadius &&
+                    bullet.y > enemy.y-enemyRadius &&
+                    bullet.y < enemy.y+enemyRadius){
+                    enemies[e].hit = true;
+                    score++;
+                }
+            }
+            if (!enemies[e].hit){
+                if (enemies[e].x > cx-centerRadius &&
+                    enemies[e].x < cx+centerRadius &&
+                    enemies[e].y > cy-centerRadius &&
+                    enemies[e].y < cy+centerRadius){
+                    enemies[e].hit = true;
+                    hitpoint+=damage;
+                }
+            }
+        }
+    }
+
+    function drawScore(){
+        ctx.font = "20px Arial";
+        ctx.fillStyle = gameColor;
+        ctx.fillText("HighScore: "+highscore, 16, 32);
+        ctx.fillText("Score: "+ score, 16,64);
+    }
+
+    function drawHitpoint(){
+        ctx.font = "20px Arial";
+        ctx.fillStyle = gameColor;
+        ctx.fillText("Hitpoint: "+hitpoint, 16, 96);
+    }
+    function drawEnding(){
+        ctx.font = "20px Arial";
+        ctx.fillStyle = "#00000F";
+        ctx.fillText("The game is finished",16, 128);
+    }
+
+    pawnEnemies();
+
+    function draw(){
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        gameColor = $("input[name=colorButton]:checked").val();
+        drawGun();
+        drawBullets();
+        drawEnemies();
+        drawScore();
+        drawHitpoint();
+        if (hitpoint<=0 || enemies.length==0) {
+            drawEnding();
+        }
+        enemyHitDetection();
+        updateBullets();
+        updateEnemies();
+        requestAnimationFrame(draw);
+    }
+    draw();
+</script>
 </body>
 </html>
+
