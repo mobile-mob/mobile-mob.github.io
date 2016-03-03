@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script>
+    var highscore = 0;
+    var gameColor = "#FF0080";
+    var bullets = []; // the lists of all bullets
+    var enemies =[];
+    var load_gameColor;
+    var score = 0;
+    var hitpoint = 100;
+    $(document).ready( function (){
+    $("#save").click( function () {
+      var msg = {
+        "message_type": "SAVE_GAME",
+        "game_data": {
+          "gameColor": gameColor,
+          "bullets" : bullets,
+          "enemies" : enemies,
+          "score" : score,
+          "hitpoint": hitpoint,
+        }
+      };
+      window.parent.postMessage(msg, "*");
+    });  
+    $("#load").click( function () {
+      var msg = {
+        "message_type": "LOAD_GAME_REQUEST",
+      };
+      window.parent.postMessage(msg, "*");
+    });
+
+    $("#score").click( function () {
+      var msg = {
+        "message_type": "POST_SCORE",
+        "score": score
+      };
+      window.parent.postMessage(msg, "*");
+    });
+
+    $("#new").click( function () {
+        document.location.reload();
+    });
+    window.addEventListener("message", function(evt) {
+      if(evt.data.message_type === "LOAD_GAME") {
+        load_gameColor = evt.data.game_data.gameColor;
+        bullets  = evt.data.game_data.bullets;
+        enemies  = evt.data.game_data.enemies;
+        score  = evt.data.game_data.score;
+        hitpoint  = evt.data.game_data.hitpoint;
+        load_game();
+      } else if (evt.data.messageType === "MESSAGE") {
+        alert(evt.data.message);
+      }
+    });
+
+    function load_game(){
+        $('input[name="colorButton"]').val([load_gameColor]);
+    }
+    });
+    </script>
+</head>
+<body>
+<h1>This is the game</h1>
+<div id="game_to_server">
+<button id="save">Save Game</button>
+<button id="load">Load Game</button>
+<button id="score">Post score</button>
+<button id="new">New Game</button>
+</div><br>
+<div>
+    <input type="radio" name="colorButton" value="#FF0080" checked>Pink</option>
+    <input type="radio" name="colorButton" value="#0000FF">Blue</option>
+    <input type="radio" name="colorButton" value="#FFFF00">Yellow</option>
+</div>
+<canvas id="cv" width="800" height="600"></canvas>
+<script>
+    var canvas = document.getElementById("cv");
+    var ctx = canvas.getContext("2d");
+    var cx = canvas.width/2; // the center of x-axis
+    var cy = canvas.height/2; // the center of y-axis
+    var gunAngle = 0; // the gun's rotational angle
+    var gunWidth = 20;
+    var gunLength = 40;
+    var centerRadius = 20; // the circular center of the gun
+
+    var bulletRadius = 10;
+    var isMouseDown = false;
+    var bulletSpeed = 1;
+
+    var enemiesNum = 10;
+    var enemyRadius = 20;
+    var enemySpeed = 0.5;
+    var damage = -20;
+
+    document.addEventListener("mousemove", mouseMoveHandler, false);
+    document.addEventListener("mousedown", mouseDownHandler, false);
+    document.addEventListener("mouseup", mouseUpHandler, false);
+
+    // disable double-clicking selection
+    document.addEventListener('mousedown', function(e){ e.preventDefault(); }, false);
+
+    function mouseMoveHandler(e){
+        mouseX=parseInt(e.clientX- 0);
+        mouseY=parseInt(e.clientY- 0);
+        var dx=mouseX-cx;
+        var dy=mouseY-cy;
+        gunAngle=Math.atan2(dy,dx);
+    }
+
+    function mouseDownHandler(e){
+        if (!isMouseDown){
+            createBullet();
+            isMouseDown = true;
+        }
+    }
+
+    function mouseUpHandler(e){
+        isMouseDown = false;
+    }
+
+    function drawGun(){
+        ctx.save();
+        ctx.translate(cx, cy);
+
+        // draw the circular center of the gun
+        ctx.beginPath();
+        ctx.arc(0,0,centerRadius, 0, Math.PI*2, false);
+        ctx.fillStyle = gameColor;
+        ctx.fill();
+        ctx.closePath();
+
+        // draw the gun
+        ctx.rotate(gunAngle);
+        ctx.beginPath();
+        ctx.rect(0 ,-gunWidth/2, gunLength, gunWidth);
+        ctx.fillStyle = gameColor;
+        ctx.fill();
+        ctx.closePath();
+        ctx.restore();
+    }
+
+    function drawBullets(){
+        for (var b=0; b<bullets.length; b++){
+            ctx.beginPath();
+            ctx.arc(bullets[b].x, bullets[b].y, bulletRadius, 0, Math.PI*2, false);
+            ctx.fillStyle = gameColor;
+            ctx.fill();
+            ctx.closePath();
+        }
+    }
+
+    function updateBullets(){
+        var b = bullets.length;
+        while (b--){
+            // update the next position of the bullets
+            if (bullets[b].x + bullets[b].dx < -bulletRadius ||
+                bullets[b].x + bullets[b].dx > canvas.width+bulletRadius ||
+                bullets[b].y + bullets[b].dy < -bulletRadius ||
+                bullets[b].y + bullets[b].dy > canvas.height+bulletRadius){
+                bullets.splice(b,1);
+            } else{
+                bullets[b].x += bullets[b].dx;
+                bullets[b].y += bullets[b].dy;
+            }
+        }
+    }
+
+    function createBullet(){
+        var newBullet = {x:cx, y: cy,
+                        dx:Math.cos(gunAngle) * bulletSpeed,
+                        dy:Math.sin(gunAngle) * bulletSpeed};
+        bullets.push(newBullet);
+    }
+
+    function drawEnemies(){
+        for (var e=0; e<enemies.length; e++){
+            ctx.beginPath();
+            ctx.arc(enemies[e].x, enemies[e].y, enemyRadius, 0, Math.PI*2, false);
+            ctx.fillStyle = gameColor;
+            ctx.fill();
+            ctx.closePath();
+        }
+    }
+
+    function updateEnemies(){
+        var e=enemies.length;
+        while(e--){
+            if (enemies[e].hit)
+                enemies.splice(e,1);
+            else{
+                enemies[e].x += enemies[e].dx;
+                enemies[e].y += enemies[e].dy;
+            }
+        }
+    }
+
+    function createEnemy(){
+        var isFromSides = false;
+        var enemyX = 0;
+        var enemyY = 0;
+        if (Math.random() < 0.5) isFromSides = true;
+        if (isFromSides){
+            enemyY = Math.random()*canvas.height;
+            if (Math.random() < 0.5) enemyX = canvas.width;
+        } else {
+            enemyX = Math.random()*canvas.width;
+            if (Math.random() < 0.5) enemyY = canvas.height;
+        }
+
+        var dx = cx-enemyX;
+        var dy = cy-enemyY;
+        var dh = Math.sqrt(dx*dx + dy*dy);
+        var enemyDx = dx/dh*enemySpeed;
+        var enemyDy = dy/dh*enemySpeed;
+
+        var newEnemy = {x: enemyX, y:enemyY, dx: enemyDx, dy: enemyDy, hit :false};
+        enemies.push(newEnemy);
+    }
+
+    function pawnEnemies(){
+        for (var e=0; e<enemiesNum; e++){
+            createEnemy();
+        }
+    }
+
+    function enemyHitDetection(){
+        for(var e=0; e<enemies.length; e++){
+            var enemy = enemies[e];
+            for(var b=0; b<bullets.length; b++){
+                var bullet = bullets[b];
+                if (bullet.x > enemy.x-enemyRadius &&
+                    bullet.x < enemy.x+enemyRadius &&
+                    bullet.y > enemy.y-enemyRadius &&
+                    bullet.y < enemy.y+enemyRadius){
+                    enemies[e].hit = true;
+                    score++;
+                }
+            }
+            if (!enemies[e].hit){
+                if (enemies[e].x > cx-centerRadius &&
+                    enemies[e].x < cx+centerRadius &&
+                    enemies[e].y > cy-centerRadius &&
+                    enemies[e].y < cy+centerRadius){
+                    enemies[e].hit = true;
+                    hitpoint+=damage;
+                }
+            }
+        }
+    }
+
+    function drawScore(){
+        ctx.font = "20px Arial";
+        ctx.fillStyle = gameColor;
+        ctx.fillText("HighScore: "+highscore, 16, 32);
+        ctx.fillText("Score: "+ score, 16,64);
+    }
+
+    function drawHitpoint(){
+        ctx.font = "20px Arial";
+        ctx.fillStyle = gameColor;
+        ctx.fillText("Hitpoint: "+hitpoint, 16, 96);
+    }
+    function drawEnding(){
+        ctx.font = "20px Arial";
+        ctx.fillStyle = "#00000F";
+        ctx.fillText("The game is finished",16, 128);
+    }
+
+    pawnEnemies();
+
+    function draw(){
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        gameColor = $("input[name=colorButton]:checked").val();
+        drawGun();
+        drawBullets();
+        drawEnemies();
+        drawScore();
+        drawHitpoint();
+        if (hitpoint<=0 || enemies.length==0) {
+            drawEnding();
+        }
+        enemyHitDetection();
+        updateBullets();
+        updateEnemies();
+        requestAnimationFrame(draw);
+    }
+    draw();
+</script>
+</body>
+</html>
+
